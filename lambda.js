@@ -183,5 +183,7 @@ function doRegex(doseText) {
 
 module.exports = {
 	handleGet: handleGet,
-	handlePost: handlePost
+	handlePost: handlePost,
+	doRegex: doRegex
 };
+
