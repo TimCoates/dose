@@ -1,6 +1,12 @@
 # dose
 Text to dose PoC
 
+## ToDo
+* Add code to generate structred dose from string matching.
+* Check that URL Encoding is working, for example is the `+` character converted to a space?
+* Add a set of tests?
+* A lot of refactoring to tidy up.
+
 ## Background
 Structured dose adds immense value to meds data.
 Where it is not captured at source, there's a question about the viability of adding it from the free text.

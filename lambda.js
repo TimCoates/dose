@@ -5,63 +5,70 @@ const dynamo = new AWS.DynamoDB.DocumentClient();
 exports.handler = async (event, context) => {
 	console.log('Received event:', JSON.stringify(event, null, 2));
 
-	let body;
-	let statusCode = '404';
-	let result = {};
-	let headers = {
-		'Content-Type': 'application/json',
+
+	let httpResult = {
+		body: {},
+		statusCode: '404',
+		headers: {
+			'Content-Type': 'application/json'
+		}
 	};
-	let params = {};
 
 	try {
 		switch (event.requestContext.http.method) {
 			case 'DELETE':
-				body = await dynamo.delete(JSON.parse(event.body)).promise();
+				let params = {
+					TableName: 'tico3_doses',
+					Key: {
+						text: event.queryStringParameters.text
+					}
+				};
+				httpResult.body = await dynamo.delete(JSON.parse(event.body)).promise();
 				break;
 
 			case 'GET':
 				if ("queryStringParameters" in event) {
 					if ("text" in event.queryStringParameters) {
-						params = {
+						let params = {
 							TableName: 'tico3_doses',
 							Key: {
 								text: event.queryStringParameters.text
 							}
 						};
-						result = await dynamo.get(params).promise();
-						console.log(result);
-						if ("Item" in result) {
-							if ("structure" in result.Item) {
+						let getResult = await dynamo.get(params).promise();
+						console.log(getResult);
+						if ("Item" in getResult) {
+							if ("structure" in getResult.Item) {
 								let xmlHeaders = ["application/xml", "application/fhir+xml", "application/xml+fhir"];
 								if (xmlHeaders.indexOf(event.headers.accept) != -1) {
 									console.log("They want XML");
 
 									// Iterate over the keys this object has
-									for (const [key, value] of Object.entries(result.Item.structure)) {
+									for (const [key, value] of Object.entries(getResult.Item.structure)) {
 										console.log(`${key}: ${value}`);
 									}
 								}
-								body = result.Item.structure;
-								statusCode = 200;
+								httpResult.body = getResult.Item.structure;
+								httpResult.statusCode = 200;
 							}
 						}
 						else {
-							body = `No structured dose matching: ${event.queryStringParameters.text}`;
-							headers = {
+							httpResult.body = `No structured dose matching: ${event.queryStringParameters.text}`;
+							httpResult.headers = {
 								'Content-Type': 'text/plain'
 							};
 						}
 					}
 					else {
-						body = "No query string parameter named text received";
-						headers = {
+						httpResult.body = "No query string parameter named text received";
+						httpResult.headers = {
 							'Content-Type': 'text/plain'
 						};
 					}
 				}
 				else {
-					body = "No query string parameter named text received";
-					headers = {
+					httpResult.body = "No query string parameter named text received";
+					httpResult.headers = {
 						'Content-Type': 'text/plain'
 					};
 				}
@@ -74,7 +81,7 @@ exports.handler = async (event, context) => {
 				} else {
 					buffer = event.body
 				}
-				params = {
+				let params = {
 					TableName: 'tico3_doses',
 					Item: {
 						"text": event.queryStringParameters.text,
@@ -82,8 +89,8 @@ exports.handler = async (event, context) => {
 					}
 				};
 
-				result = await dynamo.put(params).promise();
-				statusCode = 200;
+				let postResult = await dynamo.put(params).promise();
+				httpResult.statusCode = 200;
 				break;
 
 			default:
@@ -91,16 +98,12 @@ exports.handler = async (event, context) => {
 		}
 	}
 	catch (err) {
-		statusCode = '400';
-		body = err.message;
+		httpResult.statusCode = '400';
+		httpResult.body = err.message;
 	}
 	finally {
-		body = JSON.stringify(body);
+		httpResult.body = JSON.stringify(httpResult.body);
 	}
 
-	return {
-		statusCode,
-		body,
-		headers,
-	};
+	return httpResult;
 };

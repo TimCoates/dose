@@ -1,7 +1,11 @@
+# This attempts to get the structured dose for the text passed on the querystring
+# @name GETRequest
 GET https://ri5r6jkgohnqqsfmxlh2idvs3a0omdhs.lambda-url.eu-west-2.on.aws?text=take%20one%20twice%20daily
+# NB: The spaces can be replaced with + or %20
 
 ###
-
+# This populates the database for the text passed on the querystring
+# @name POSTRequest
 POST https://ri5r6jkgohnqqsfmxlh2idvs3a0omdhs.lambda-url.eu-west-2.on.aws?text=take%20one%20twice%20daily
 Content-Type: application/json
 
