@@ -169,7 +169,7 @@ function doRegex(doseText) {
 
 		answer = DoTaken(answer);
 
-		answer = WhatsLeft(answer);
+		delete answer.lower;
 
 	} catch (err) {
 		console.log("Exception caught: " + err);
@@ -2257,29 +2257,5 @@ function DoTaken(obj) {
 		}
 		obj.lower = obj.lower.replace(/\b(?:take|taken)\b/gmi, "[[METHOD]]");
 	}
-	return obj;
-}
-
-/** Split out any residual text for consideration
- * 
- * @param {*} obj 
- * @returns 
- */
-function WhatsLeft(obj) {
-	let leftovers = obj.lower.replace(/\[\[METHOD\]\]/gmi, "");
-	leftovers = leftovers.replace(/\[\[ROUTE\]\]/gmi, "");
-	leftovers = leftovers.replace(/\[\[FREQUENCY\]\]/gmi, "");
-	leftovers = leftovers.replace(/\[\[FORM\]\]/gmi, "");
-	leftovers = leftovers.replace(/\[\[ADDITIONAL\]\]/gmi, "");
-	leftovers = leftovers.replace(/\[\[MORNING\]\]/gmi, "");
-	leftovers = leftovers.replace(/\[\[NIGHT\]\]/gmi, "");
-	leftovers = leftovers.replace(/\[\[QUANTITY\]\]/gmi, "");
-	leftovers = leftovers.replace(/\[\[ASNEEDED\]\]/gmi, "");
-	leftovers = leftovers.replace(/\s\s/gmi, " ");
-	leftovers = leftovers.replace(/\s*$/gmi, "");
-	leftovers = leftovers.replace(/^\s*/gmi, "");
-	leftovers = leftovers.replace(/^to be$/gmi, "");
-
-	obj.leftovers = leftovers;
 	return obj;
 }
