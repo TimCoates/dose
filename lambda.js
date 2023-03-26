@@ -83,9 +83,9 @@ exports.handler = async (event, context) => {
 
 /** Function to do the GET and return the httpResult object
  * 
- * @param {*} dosetext 
+ * @param {*} doseText 
  */
-async function handleGet(dosetext) {
+async function handleGet(doseText) {
 	let httpResult = {
 		body: {},
 		statusCode: '404',
@@ -95,7 +95,7 @@ async function handleGet(dosetext) {
 	try {
 		let params = {
 			TableName: 'tico3_doses',
-			Key: { text: dosetext }
+			Key: { text: doseText }
 		};
 		let getResult = await dynamo.get(params).promise();
 		console.log(getResult);
@@ -106,7 +106,8 @@ async function handleGet(dosetext) {
 			}
 		}
 		else {
-			httpResult.body = `No structured dose matching: ${dosetext}`;
+			/// Here we're going to try regexing...
+			httpResult.body = `No structured dose matching: ${doseText}`;
 			httpResult.headers = {
 				'Content-Type': 'text/plain'
 			};
@@ -120,3 +121,9 @@ async function handleGet(dosetext) {
 	}
 	return httpResult;
 }
+
+/** Function to try to build a structure based on the text strings that match
+ * 
+ * @param {*} dosetext 
+ */
+function doRegex(doseText) { }

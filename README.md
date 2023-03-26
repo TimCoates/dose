@@ -6,6 +6,8 @@ Text to dose PoC
 * Check that URL Encoding is working, for example is the `+` character converted to a space?
 * Add a set of tests?
 * A lot of refactoring to tidy up.
+* Add ability to return XML where Accept header asks for it.
+* Sort out the code to handle `DELETE` requests.
 
 ## Background
 Structured dose adds immense value to meds data.
