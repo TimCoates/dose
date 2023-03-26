@@ -122,8 +122,66 @@ async function handleGet(doseText) {
 	return httpResult;
 }
 
+async function handlePost(doseText, structure) { }
+
 /** Function to try to build a structure based on the text strings that match
  * 
  * @param {*} dosetext 
  */
-function doRegex(doseText) { }
+function doRegex(doseText) {
+	let answer = {
+		text: doseText,
+		lower: doseText.toLowerCase()
+	};
+
+	try {
+
+		// Handle the various Forms
+		answer = DoForms(answer);
+
+		answer = DoLatin(answer);
+
+		answer = DoTimesPerDay(answer);
+
+		answer = DoTimesPerWeek(answer);
+
+		answer = DoHourlies(answer);
+
+		answer = DoTimings(answer);
+
+		answer = DoBoundsDurations(answer);
+
+		answer = DoRoutes(answer);
+
+		answer = DoMethods(answer);
+
+		answer = DoQuantities(answer);
+
+		answer = DoQuantitiesAgain(answer);
+
+		answer = DoTimeConstraints(answer);
+
+		answer = DoFoodTiming(answer);
+
+		answer = DoRequired(answer);
+
+		answer = DoDirected(answer);
+
+		answer = DoTaken(answer);
+
+		answer = WhatsLeft(answer);
+
+	} catch (err) {
+		console.log("Exception caught: " + err);
+		console.log("=====================================================================================================");
+		console.log(JSON.stringify(answer, null, 2));
+		console.log("=====================================================================================================");
+	}
+	return answer;
+
+}
+
+module.exports = {
+	handleGet: handleGet,
+	handlePost: handlePost
+};
