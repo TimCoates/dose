@@ -1,0 +1,42 @@
+GET https://ri5r6jkgohnqqsfmxlh2idvs3a0omdhs.lambda-url.eu-west-2.on.aws?text=take%20one%20twice%20daily
+
+###
+
+POST https://ri5r6jkgohnqqsfmxlh2idvs3a0omdhs.lambda-url.eu-west-2.on.aws?text=take%20one%20twice%20daily
+Content-Type: application/json
+
+{
+    "text": "take one twice daily",
+    "timing": {
+        "repeat": {
+            "frequency": 2,
+            "period": 1,
+            "periodUnit": "d"
+        }
+    },
+    "method": {
+        "coding": [
+            {
+                "system": "http://snomed.info/sct",
+                "code": "419652001",
+                "display": "Take"
+            }
+        ]
+    },
+    "doseAndRate": [
+        {
+            "type": {
+                "coding": [
+                    {
+                        "system": "http://terminology.hl7.org/CodeSystem/dose-rate-type",
+                        "code": "ordered",
+                        "display": "Ordered"
+                    }
+                ]
+            },
+            "doseQuantity": {
+                "value": 1
+            }
+        }
+    ]
+}
