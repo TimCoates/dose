@@ -5,7 +5,7 @@ const dynamo = new AWS.DynamoDB.DocumentClient();
 exports.handler = async (event, context) => {
 	console.log('Received event:', JSON.stringify(event, null, 2));
 
-
+	let params = {};
 	let httpResult = {
 		body: {},
 		statusCode: '404',
@@ -17,7 +17,7 @@ exports.handler = async (event, context) => {
 	try {
 		switch (event.requestContext.http.method) {
 			case 'DELETE':
-				let params = {
+				params = {
 					TableName: 'tico3_doses',
 					Key: {
 						text: event.queryStringParameters.text
@@ -29,35 +29,7 @@ exports.handler = async (event, context) => {
 			case 'GET':
 				if ("queryStringParameters" in event) {
 					if ("text" in event.queryStringParameters) {
-						let params = {
-							TableName: 'tico3_doses',
-							Key: {
-								text: event.queryStringParameters.text
-							}
-						};
-						let getResult = await dynamo.get(params).promise();
-						console.log(getResult);
-						if ("Item" in getResult) {
-							if ("structure" in getResult.Item) {
-								let xmlHeaders = ["application/xml", "application/fhir+xml", "application/xml+fhir"];
-								if (xmlHeaders.indexOf(event.headers.accept) != -1) {
-									console.log("They want XML");
-
-									// Iterate over the keys this object has
-									for (const [key, value] of Object.entries(getResult.Item.structure)) {
-										console.log(`${key}: ${value}`);
-									}
-								}
-								httpResult.body = getResult.Item.structure;
-								httpResult.statusCode = 200;
-							}
-						}
-						else {
-							httpResult.body = `No structured dose matching: ${event.queryStringParameters.text}`;
-							httpResult.headers = {
-								'Content-Type': 'text/plain'
-							};
-						}
+						httpResult = await handleGet(event.queryStringParameters.text);
 					}
 					else {
 						httpResult.body = "No query string parameter named text received";
@@ -81,7 +53,7 @@ exports.handler = async (event, context) => {
 				} else {
 					buffer = event.body
 				}
-				let params = {
+				params = {
 					TableName: 'tico3_doses',
 					Item: {
 						"text": event.queryStringParameters.text,
@@ -107,3 +79,44 @@ exports.handler = async (event, context) => {
 
 	return httpResult;
 };
+
+
+/** Function to do the GET and return the httpResult object
+ * 
+ * @param {*} dosetext 
+ */
+async function handleGet(dosetext) {
+	let httpResult = {
+		body: {},
+		statusCode: '404',
+		headers: { 'Content-Type': 'application/json' }
+	};
+
+	try {
+		let params = {
+			TableName: 'tico3_doses',
+			Key: { text: dosetext }
+		};
+		let getResult = await dynamo.get(params).promise();
+		console.log(getResult);
+		if ("Item" in getResult) {
+			if ("structure" in getResult.Item) {
+				httpResult.body = getResult.Item.structure;
+				httpResult.statusCode = 200;
+			}
+		}
+		else {
+			httpResult.body = `No structured dose matching: ${dosetext}`;
+			httpResult.headers = {
+				'Content-Type': 'text/plain'
+			};
+		}
+	} catch (err) {
+		httpResult.statusCode = '400';
+		httpResult.body = err.message;
+	}
+	finally {
+		httpResult.body = JSON.stringify(httpResult.body);
+	}
+	return httpResult;
+}
