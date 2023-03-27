@@ -39,6 +39,46 @@ let testGET = {
 	"isBase64Encoded": false
 };
 
+let testGET2 = {
+	"version": "2.0",
+	"routeKey": "$default",
+	"rawPath": "/",
+	"rawQueryString": "text=take%20one%20three%20times%20daily",
+	"headers": {
+		"x-amzn-tls-cipher-suite": "ECDHE-RSA-AES128-GCM-SHA256",
+		"x-amzn-tls-version": "TLSv1.2",
+		"x-amzn-trace-id": "Root=1-641f8a7a-7a50a2ea53dfb8fd692d3acf",
+		"x-forwarded-proto": "https",
+		"host": "ri5r6jkgohnqqsfmxlh2idvs3a0omdhs.lambda-url.eu-west-2.on.aws",
+		"x-forwarded-port": "443",
+		"x-forwarded-for": "81.102.154.20",
+		"accept-encoding": "gzip, deflate",
+		"user-agent": "vscode-restclient"
+	},
+	"queryStringParameters": {
+		"text": "take one three times daily"
+	},
+	"requestContext": {
+		"accountId": "anonymous",
+		"apiId": "ri5r6jkgohnqqsfmxlh2idvs3a0omdhs",
+		"domainName": "ri5r6jkgohnqqsfmxlh2idvs3a0omdhs.lambda-url.eu-west-2.on.aws",
+		"domainPrefix": "ri5r6jkgohnqqsfmxlh2idvs3a0omdhs",
+		"http": {
+			"method": "GET",
+			"path": "/",
+			"protocol": "HTTP/1.1",
+			"sourceIp": "81.102.154.20",
+			"userAgent": "vscode-restclient"
+		},
+		"requestId": "060d5e58-3cac-411f-ad21-01b76bb81373",
+		"routeKey": "$default",
+		"stage": "$default",
+		"time": "25/Mar/2023:23:57:46 +0000",
+		"timeEpoch": 1679788666258
+	},
+	"isBase64Encoded": false
+};
+
 let testPOST = {
 	"version": "2.0",
 	"routeKey": "$default",
@@ -118,8 +158,76 @@ let testStructure = {
 	]
 };
 
+let testRecord = {
+	"text": "One To Be Taken Each Day",
+	"structure": {
+		"text": "One To Be Taken Each Day",
+		"doseAndRate": [
+			{
+				"doseQuantity": {
+					"value": 1
+				},
+				"type": {
+					"coding": [
+						{
+							"code": "ordered",
+							"display": "Ordered",
+							"system": "http://terminology.hl7.org/CodeSystem/dose-rate-type"
+						}
+					]
+				}
+			}
+		],
+		"method": {
+			"coding": [
+				{
+					"code": "419652001",
+					"display": "Take",
+					"system": "http://snomed.info/sct"
+				}
+			]
+		},
+		"timing": {
+			"repeat": {
+				"frequency": 1,
+				"period": 1,
+				"periodUnit": "d"
+			}
+		}
+	}
+};
+
+let testRegexed = {
+	text: "take one three times daily",
+	suggested: {
+		text: "take one three times daily",
+		timing: {
+			repeat: {
+				frequency: 3,
+				period: 1,
+				periodUnit: "d"
+			}
+		},
+		method: {
+			coding: [
+				{
+					system: "http://snomed.info/sct",
+					code: "419652001",
+					display: "Take"
+				}
+			]
+		},
+		doseQuantity: {
+			value: 1
+		}
+	}
+};
+
 module.exports = {
 	testGET: testGET,
+	testGET2: testGET2,
 	testPOST: testPOST,
-	testStructure: testStructure
+	testStructure: testStructure,
+	testRecord: testRecord,
+	testRegexed: testRegexed
 };

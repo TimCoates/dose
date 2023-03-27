@@ -4,7 +4,7 @@
   "description": "Text to dose PoC",
   "main": "lambda.js",
   "scripts": {
-    "test": "jest --coverage --silent"
+    "test": "jest --coverage"
   },
   "keywords": [],
   "author": "",

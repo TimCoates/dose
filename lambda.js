@@ -1,11 +1,10 @@
 const AWS = require('aws-sdk');
 
-const dynamo = new AWS.DynamoDB.DocumentClient();
-
-exports.handler = async (event, context) => {
+async function handler(event, context) {
 	console.log('Received event:', JSON.stringify(event, null, 2));
 
 	let params = {};
+	let result = null;
 	let httpResult = {
 		body: {},
 		statusCode: '404',
@@ -27,9 +26,18 @@ exports.handler = async (event, context) => {
 				break;
 
 			case 'GET':
+
 				if ("queryStringParameters" in event) {
 					if ("text" in event.queryStringParameters) {
-						httpResult = await handleGet(event.queryStringParameters.text);
+						result = await handleGet(event.queryStringParameters.text);
+						if (result == null) {
+							result = {
+								"text": event.queryStringParameters.text,
+								"suggested": doRegex(event.queryStringParameters.text)
+							};
+						}
+						httpResult.body = result;
+						httpResult.statusCode = "200";
 					}
 					else {
 						httpResult.body = "No query string parameter named text received";
@@ -74,52 +82,37 @@ exports.handler = async (event, context) => {
 		httpResult.body = err.message;
 	}
 	finally {
-		httpResult.body = JSON.stringify(httpResult.body);
+		httpResult.body = JSON.stringify(result);
 	}
 
 	return httpResult;
 };
 
 
-/** Function to do the GET and return the httpResult object
+/** Function to do the get from database and return the found object or null
  * 
  * @param {*} doseText 
  */
 async function handleGet(doseText) {
-	let httpResult = {
-		body: {},
-		statusCode: '404',
-		headers: { 'Content-Type': 'application/json' }
-	};
+	let docClient = new AWS.DynamoDB.DocumentClient();
+	let result = null;
 
 	try {
 		let params = {
 			TableName: 'tico3_doses',
 			Key: { text: doseText }
 		};
-		let getResult = await dynamo.get(params).promise();
+		let getResult = await docClient.get(params).promise();
 		console.log(getResult);
 		if ("Item" in getResult) {
 			if ("structure" in getResult.Item) {
-				httpResult.body = getResult.Item.structure;
-				httpResult.statusCode = 200;
+				result = getResult.Item.structure;
 			}
 		}
-		else {
-			/// Here we're going to try regexing...
-			httpResult.body = `No structured dose matching: ${doseText}`;
-			httpResult.headers = {
-				'Content-Type': 'text/plain'
-			};
-		}
 	} catch (err) {
-		httpResult.statusCode = '400';
-		httpResult.body = err.message;
+		console.log(JSON.stringify(err));
 	}
-	finally {
-		httpResult.body = JSON.stringify(httpResult.body);
-	}
-	return httpResult;
+	return result;
 }
 
 async function handlePost(doseText, structure) { }
@@ -184,7 +177,9 @@ function doRegex(doseText) {
 module.exports = {
 	handleGet: handleGet,
 	handlePost: handlePost,
-	doRegex: doRegex
+	doRegex: doRegex,
+	pad: pad,
+	handler: handler
 };
 
 /** Pads a number to 2 digits (e.g. converts '8' to '08')
@@ -193,7 +188,7 @@ module.exports = {
  * @returns 
  */
 function pad(num) {
-	return ("0" + num).slice(-2);
+	return ("00" + num).slice(-2);
 }
 
 /** Handles Tablets, Capsules, Drops, Puffs, Drops and Doses
