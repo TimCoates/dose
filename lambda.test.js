@@ -67,6 +67,7 @@ describe("Testing Lambda", () => {
             let event = testEvents.testDelete;
             AWSMock.mock('DynamoDB.DocumentClient', 'delete', (params, callback) => {
                 console.log('DynamoDB.DocumentClient', 'delete', 'mock called');
+                // delete just returns {}
                 callback(null, {});
             });
 
@@ -162,9 +163,43 @@ describe("Testing Lambda", () => {
         });
     });
 
-    describe("Testing doGet", () => {
+    describe("Testing handlePOST", () => {
 
-        it('Succeeds when reord found', async () => {
+        it("Works", async() => {
+            AWSMock.mock('DynamoDB.DocumentClient', 'put', (params, callback) => {
+                console.log('DynamoDB.DocumentClient', 'put', 'mock called');
+                callback(null, { });
+            });
+
+            let doseText = "take one daily";
+            let structure = testEvents.testStructure;
+            let result = await utils.handlePost(doseText, structure);
+            
+            AWSMock.restore('DynamoDB.DocumentClient');
+            expect(result).toStrictEqual({});
+        });
+    });
+
+    describe("Testing handleDelete", () => {
+
+        it('Succeeds', async () => {
+
+            AWSMock.mock('DynamoDB.DocumentClient', 'delete', (params, callback) => {
+                console.log('DynamoDB.DocumentClient', 'delete', 'mock called');
+                callback(null, {});
+            });
+
+            const data = await utils.handleDelete(eventData.testGET);
+
+            AWSMock.restore('DynamoDB.DocumentClient');
+            expect(data).toStrictEqual({});
+        });
+
+    });
+
+    describe("Testing handleGet", () => {
+
+        it('Succeeds when record found', async () => {
 
             AWSMock.mock('DynamoDB.DocumentClient', 'get', (params, callback) => {
                 console.log('DynamoDB.DocumentClient', 'get', 'mock called');
@@ -173,8 +208,8 @@ describe("Testing Lambda", () => {
 
             const data = await utils.handleGet(eventData.testGET);
 
-            expect(data).toBe(testEvents.testRecord.structure);
             AWSMock.restore('DynamoDB.DocumentClient');
+            expect(data).toBe(testEvents.testRecord.structure);
         });
 
         it('Handles not found', async () => {

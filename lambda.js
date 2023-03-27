@@ -15,80 +15,54 @@ async function handler(event, context) {
 	};
 
 	try {
-		switch (event.requestContext.http.method) {
 
-			case 'DELETE':
-				if ("queryStringParameters" in event) {
-					if ("text" in event.queryStringParameters) {
-						let docClient = new AWS.DynamoDB.DocumentClient();
-						let params = {
-							TableName: 'tico3_doses',
-							Key: { text: event.queryStringParameters.text }
-						};
-						httpResult.body = await docClient.delete(params).promise();
+		if ("queryStringParameters" in event) {
+			if ("text" in event.queryStringParameters) {
+
+				switch (event.requestContext.http.method) {
+
+					case 'DELETE':
+						let delResult = handleDelete(event.queryStringParameters.text);
 						result = { "outcome": "deleted" };
 						httpResult.statusCode = "200";
-					} else {
-						httpResult.body = "No query string parameter named text received";
-						httpResult.headers = { 'Content-Type': 'text/plain' };
-					}
-				} else {
-					httpResult.body = "No query string parameter named text received";
-					httpResult.headers = { 'Content-Type': 'text/plain' };
-				}
-				break;
+						break;
 
-			case 'GET':
-				if ("queryStringParameters" in event) {
-					if ("text" in event.queryStringParameters) {
+					case 'GET':
 						result = await handleGet(event.queryStringParameters.text);
 						if (result == null) {
+							let suggestion = doRegex(event.queryStringParameters.text);
 							result = {
 								"text": event.queryStringParameters.text,
-								"suggested": doRegex(event.queryStringParameters.text)
+								"suggested": suggestion
 							};
 						}
 						httpResult.body = result;
 						httpResult.statusCode = "200";
-					}
-					else {
-						httpResult.body = "No query string parameter named text received";
-						httpResult.headers = {
-							'Content-Type': 'text/plain'
-						};
-					}
-				}
-				else {
-					httpResult.body = "No query string parameter named text received";
-					httpResult.headers = {
-						'Content-Type': 'text/plain'
-					};
-				}
-				break;
+						break;
 
-			case 'POST':
-				let docClient = new AWS.DynamoDB.DocumentClient();
-				let buffer;
-				if (event.isBase64Encoded) {
-					buffer = Buffer.from(event.body, 'base64').toString('ascii');
-				} else {
-					buffer = event.body
+					case 'POST':
+						let structure;
+						if (event.isBase64Encoded) {
+							structure = JSON.parse(Buffer.from(event.body, 'base64').toString('ascii'));
+						} else {
+							structure = JSON.parse(event.body);
+						}
+						let postResult = await handlePost(event.queryStringParameters.text, structure);
+						httpResult.statusCode = "200";
+						result = { "outcome": "saved" };
+						break;
+
+					default:
+						throw new Error(`Unsupported method "${event.httpMethod}"`);
 				}
-				params = {
-					TableName: 'tico3_doses',
-					Item: {
-						"text": event.queryStringParameters.text,
-						"structure": JSON.parse(buffer)
-					}
-				};
 
-				let postResult = await docClient.put(params).promise();
-				httpResult.statusCode = "200";
-				result = { "outcome": "saved" };
-				break;
-
-			default:
-				throw new Error(`Unsupported method "${event.httpMethod}"`);
+			} else {
+				httpResult.body = "No query string parameter named text received";
+				httpResult.headers = { 'Content-Type': 'text/plain' };
+			}
+		} else {
+			httpResult.body = "No query string parameter named text received";
+			httpResult.headers = { 'Content-Type': 'text/plain' };
 		}
 	} catch (err) {
 		httpResult.statusCode = '400';
@@ -101,6 +75,19 @@ async function handler(event, context) {
 	return httpResult;
 };
 
+/** Handles deleting from the database
+ * 
+ * @param {*} doseText 
+ */
+async function handleDelete(doseText) {
+	let docClient = new AWS.DynamoDB.DocumentClient();
+	let params = {
+		TableName: 'tico3_doses',
+		Key: { text: doseText }
+	};
+	let delResult = await docClient.delete(params).promise();
+	return {};
+}
 
 /** Function to do the get from database and return the found object or null
  * 
@@ -128,7 +115,23 @@ async function handleGet(doseText) {
 	return result;
 }
 
-async function handlePost(doseText, structure) { }
+/** Function to do a put to the database. Returns nothing of interest.
+ * 
+ * @param {*} doseText 
+ * @param {*} structure 
+ */
+async function handlePost(doseText, structure) {
+	let docClient = new AWS.DynamoDB.DocumentClient();
+	params = {
+		TableName: 'tico3_doses',
+		Item: {
+			"text": doseText,
+			"structure": structure
+		}
+	};
+	let postResult = await docClient.put(params).promise();
+	return postResult;
+}
 
 /** Function to try to build a structure based on the text strings that match
  * 
@@ -190,6 +193,7 @@ function doRegex(doseText) {
 module.exports = {
 	handleGet: handleGet,
 	handlePost: handlePost,
+	handleDelete: handleDelete,
 	doRegex: doRegex,
 	pad: pad,
 	handler: handler
