@@ -79,6 +79,46 @@ let testGET2 = {
 	"isBase64Encoded": false
 };
 
+let testGETNoText = {
+	"version": "2.0",
+	"routeKey": "$default",
+	"rawPath": "/",
+	"rawQueryString": "not=here",
+	"headers": {
+		"x-amzn-tls-cipher-suite": "ECDHE-RSA-AES128-GCM-SHA256",
+		"x-amzn-tls-version": "TLSv1.2",
+		"x-amzn-trace-id": "Root=1-641f8a7a-7a50a2ea53dfb8fd692d3acf",
+		"x-forwarded-proto": "https",
+		"host": "ri5r6jkgohnqqsfmxlh2idvs3a0omdhs.lambda-url.eu-west-2.on.aws",
+		"x-forwarded-port": "443",
+		"x-forwarded-for": "81.102.154.20",
+		"accept-encoding": "gzip, deflate",
+		"user-agent": "vscode-restclient"
+	},
+	"queryStringParameters": {
+		"not": "here"
+	},
+	"requestContext": {
+		"accountId": "anonymous",
+		"apiId": "ri5r6jkgohnqqsfmxlh2idvs3a0omdhs",
+		"domainName": "ri5r6jkgohnqqsfmxlh2idvs3a0omdhs.lambda-url.eu-west-2.on.aws",
+		"domainPrefix": "ri5r6jkgohnqqsfmxlh2idvs3a0omdhs",
+		"http": {
+			"method": "GET",
+			"path": "/",
+			"protocol": "HTTP/1.1",
+			"sourceIp": "81.102.154.20",
+			"userAgent": "vscode-restclient"
+		},
+		"requestId": "060d5e58-3cac-411f-ad21-01b76bb81373",
+		"routeKey": "$default",
+		"stage": "$default",
+		"time": "25/Mar/2023:23:57:46 +0000",
+		"timeEpoch": 1679788666258
+	},
+	"isBase64Encoded": false
+};
+
 let testPOST = {
 	"version": "2.0",
 	"routeKey": "$default",
@@ -223,11 +263,35 @@ let testRegexed = {
 	}
 };
 
+let testDelete = {
+	rawPath: "/",
+	rawQueryString: "text=take%20one%20twice%20daily",
+	headers: {
+		"accept-encoding": "gzip, deflate"
+	},
+	"queryStringParameters": {
+		"text": "take one twice daily"
+	},
+	"requestContext": {
+		"http": {
+			"method": "DELETE",
+			"path": "/",
+			"protocol": "HTTP/1.1",
+			"sourceIp": "20.0.213.50",
+			"userAgent": "vscode-restclient"
+		}
+	},
+	"isBase64Encoded": false
+}
+	;
+
 module.exports = {
 	testGET: testGET,
 	testGET2: testGET2,
+	testGETNoText: testGETNoText,
 	testPOST: testPOST,
 	testStructure: testStructure,
 	testRecord: testRecord,
-	testRegexed: testRegexed
+	testRegexed: testRegexed,
+	testDelete: testDelete
 };

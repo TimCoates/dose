@@ -44,3 +44,6 @@ Content-Type: application/json
         }
     ]
 }
+
+###
+DELETE https://ri5r6jkgohnqqsfmxlh2idvs3a0omdhs.lambda-url.eu-west-2.on.aws?text=take%20one%20twice%20daily

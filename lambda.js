@@ -1,6 +1,7 @@
 const AWS = require('aws-sdk');
 
 async function handler(event, context) {
+
 	console.log('Received event:', JSON.stringify(event, null, 2));
 
 	let params = {};
@@ -15,18 +16,29 @@ async function handler(event, context) {
 
 	try {
 		switch (event.requestContext.http.method) {
+
 			case 'DELETE':
-				params = {
-					TableName: 'tico3_doses',
-					Key: {
-						text: event.queryStringParameters.text
+				if ("queryStringParameters" in event) {
+					if ("text" in event.queryStringParameters) {
+						let docClient = new AWS.DynamoDB.DocumentClient();
+						let params = {
+							TableName: 'tico3_doses',
+							Key: { text: event.queryStringParameters.text }
+						};
+						httpResult.body = await docClient.delete(params).promise();
+						result = { "outcome": "deleted" };
+						httpResult.statusCode = "200";
+					} else {
+						httpResult.body = "No query string parameter named text received";
+						httpResult.headers = { 'Content-Type': 'text/plain' };
 					}
-				};
-				httpResult.body = await dynamo.delete(JSON.parse(event.body)).promise();
+				} else {
+					httpResult.body = "No query string parameter named text received";
+					httpResult.headers = { 'Content-Type': 'text/plain' };
+				}
 				break;
 
 			case 'GET':
-
 				if ("queryStringParameters" in event) {
 					if ("text" in event.queryStringParameters) {
 						result = await handleGet(event.queryStringParameters.text);
@@ -55,6 +67,7 @@ async function handler(event, context) {
 				break;
 
 			case 'POST':
+				let docClient = new AWS.DynamoDB.DocumentClient();
 				let buffer;
 				if (event.isBase64Encoded) {
 					buffer = Buffer.from(event.body, 'base64').toString('ascii');
@@ -69,15 +82,15 @@ async function handler(event, context) {
 					}
 				};
 
-				let postResult = await dynamo.put(params).promise();
-				httpResult.statusCode = 200;
+				let postResult = await docClient.put(params).promise();
+				httpResult.statusCode = "200";
+				result = { "outcome": "saved" };
 				break;
 
 			default:
 				throw new Error(`Unsupported method "${event.httpMethod}"`);
 		}
-	}
-	catch (err) {
+	} catch (err) {
 		httpResult.statusCode = '400';
 		httpResult.body = err.message;
 	}

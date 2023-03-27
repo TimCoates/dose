@@ -36,6 +36,47 @@ describe("Testing Lambda", () => {
             AWSMock.restore('DynamoDB.DocumentClient');
         });
 
+        it('GET Sends 404 when no text provided on query string', async () => {
+            let event = testEvents.testGETNoText;
+            AWSMock.mock('DynamoDB.DocumentClient', 'get', (params, callback) => {
+                console.log('DynamoDB.DocumentClient', 'get', 'mock called');
+                callback(null, {});
+            });
+
+            let response = await utils.handler(event);
+            console.log(response);
+            expect(response.statusCode).toBe('404');
+            AWSMock.restore('DynamoDB.DocumentClient');
+        });
+
+        it('POST Succeeds', async () => {
+            let event = testEvents.testPOST;
+            AWSMock.mock('DynamoDB.DocumentClient', 'put', (params, callback) => {
+                console.log('DynamoDB.DocumentClient', 'put', 'mock called');
+                callback(null, {});
+            });
+
+            let response = await utils.handler(event);
+            console.log(response);
+            expect(response.statusCode).toBe('200');
+            expect(JSON.parse(response.body)).toStrictEqual({ "outcome": "saved" });
+            AWSMock.restore('DynamoDB.DocumentClient');
+        });
+
+        it('DELETE Succeeds', async () => {
+            let event = testEvents.testDelete;
+            AWSMock.mock('DynamoDB.DocumentClient', 'delete', (params, callback) => {
+                console.log('DynamoDB.DocumentClient', 'delete', 'mock called');
+                callback(null, {});
+            });
+
+            let response = await utils.handler(event);
+            console.log(response);
+            expect(response.statusCode).toBe('200');
+            expect(JSON.parse(response.body)).toStrictEqual({ "outcome": "deleted" });
+            AWSMock.restore('DynamoDB.DocumentClient');
+        });
+
     });
 
     describe("Testing doRegex", () => {
