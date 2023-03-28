@@ -165,16 +165,16 @@ describe("Testing Lambda", () => {
 
     describe("Testing handlePOST", () => {
 
-        it("Works", async() => {
+        it("Works", async () => {
             AWSMock.mock('DynamoDB.DocumentClient', 'put', (params, callback) => {
                 console.log('DynamoDB.DocumentClient', 'put', 'mock called');
-                callback(null, { });
+                callback(null, {});
             });
 
             let doseText = "take one daily";
             let structure = testEvents.testStructure;
             let result = await utils.handlePost(doseText, structure);
-            
+
             AWSMock.restore('DynamoDB.DocumentClient');
             expect(result).toStrictEqual({});
         });

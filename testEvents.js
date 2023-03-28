@@ -240,7 +240,7 @@ let testRecord = {
 let testRegexed = {
 	text: "take one three times daily",
 	suggested: {
-		text: "take one three times daily",
+		text: "Take 3 times a day",
 		timing: {
 			repeat: {
 				frequency: 3,

@@ -47,3 +47,77 @@ Content-Type: application/json
 
 ###
 DELETE https://ri5r6jkgohnqqsfmxlh2idvs3a0omdhs.lambda-url.eu-west-2.on.aws?text=take%20one%20twice%20daily
+
+###
+# @name DoseToText
+POST https://internal-qa.api.service.nhs.uk/electronic-prescriptions/FHIR/R4/$dose-to-text
+Content-Type: application/json
+
+{
+    "text": "2 tablet - 4 times a day - at a meal - Dissolve or mix with water before taking - up to a maximum of 3.6 gram in 24 hours",
+    "additionalInstruction":  [
+        {
+            "coding":  [
+                {
+                    "system": "http://snomed.info/sct",
+                    "code": "417995008",
+                    "display": "Dissolve or mix with water before taking"
+                }
+            ]
+        }
+    ],
+    "timing": {
+        "repeat": {
+            "frequency": 4,
+            "period": 1,
+            "periodUnit": "d",
+            "when":  [
+                "C"
+            ]
+        }
+    },
+    "doseAndRate":  [
+        {
+            "doseQuantity": {
+                "value": 2,
+                "unit": "tablet",
+                "system": "http://snomed.info/sct",
+                "code": "428673006"
+            }
+        }
+    ],
+    "maxDosePerPeriod": {
+        "numerator": {
+            "value": 3.6,
+            "unit": "gram",
+            "system": "http://unitsofmeasure.org",
+            "code": "g"
+        },
+        "denominator": {
+            "value": 24,
+            "unit": "hour",
+            "system": "http://unitsofmeasure.org",
+            "code": "h"
+        }
+    }
+}
+
+###
+
+
+
+# const BASEURL = "https://internal-qa.api.service.nhs.uk/";
+# const CLIENTID = "J1FMsDsYP3hFeOOziI0csLf3EOf3jSkM";
+# const REDIRECT = "https%3A%2F%2Fexample.org%2F";
+
+# let digestResponse = await fetch(BASEURL + "electronic-prescriptions/FHIR/R4/$prepare", {
+		method: 'POST',
+		headers: {
+			'Authorization': 'Bearer ' + token,
+			'NHSD-Session-URID': "555254242106",
+			'X-Request-ID': '442b076a-d739-45a4-92c1-65c518d586b5',
+			'X-Correlation-ID': 'f97ec409-c3f9-4def-954c-c19204d02596',
+			'Content-Type': 'application/JSON',
+		},
+		body: JSON.stringify(prescription)
+	});

@@ -1,4 +1,5 @@
 const AWS = require('aws-sdk');
+var dose = require("./doseToText.js");
 
 async function handler(event, context) {
 
@@ -31,6 +32,10 @@ async function handler(event, context) {
 						result = await handleGet(event.queryStringParameters.text);
 						if (result == null) {
 							let suggestion = doRegex(event.queryStringParameters.text);
+
+							let newText = dose.stringifyDosage(suggestion);
+							suggestion.text = newText;
+
 							result = {
 								"text": event.queryStringParameters.text,
 								"suggested": suggestion
